@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>产品需求查询系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .search-section {
+            padding: 30px 40px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 12px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 14px 20px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .search-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .search-btn {
+            padding: 14px 32px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .search-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .search-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .toolbar {
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .result-info {
+            color: #6c757d;
+            font-size: 14px;
+        }
+
+        .export-btn {
+            padding: 10px 24px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .export-btn:hover {
+            background: #218838;
+            transform: translateY(-1px);
+        }
+
+        .export-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .table-container {
+            padding: 0 40px 40px;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        thead {
+            background: #f8f9fa;
+            position: sticky;
+            top: 0;
+        }
+
+        th {
+            padding: 16px 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #495057;
+            border-bottom: 2px solid #dee2e6;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 14px 12px;
+            border-bottom: 1px solid #e9ecef;
+            color: #212529;
+            vertical-align: middle;
+        }
+
+        tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-right: 6px;
+            margin-bottom: 4px;
+        }
+
+        .tag-level-1 {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .tag-level-2 {
+            background: #f3e5f5;
+            color: #7b1fa2;
+        }
+
+        .tag-level-3 {
+            background: #e8f5e9;
+            color: #388e3c;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px;
+            color: #6c757d;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px;
+            color: #6c757d;
+        }
+
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin: 20px 40px;
+            border-left: 4px solid #dc3545;
+        }
+
+        @media (max-width: 768px) {
+            .search-box {
+                flex-direction: column;
+            }
+            
+            .search-input, .search-btn {
+                width: 100%;
+            }
+            
+            .toolbar {
+                flex-direction: column;
+                gap: 15px;
+                align-items: stretch;
+            }
+            
+            .export-btn {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📋 产品需求查询系统</h1>
+            <p>输入关键词快速查询产品需求，支持导出Excel</p>
+        </div>
+
+        <div class="search-section">
+            <div class="search-box">
+                <input 
+                    type="text" 
+                    class="search-input" 
+                    id="searchInput" 
+                    placeholder="请输入查询条件，如：关联数据、跨应用等..."
+                    onkeypress="if(event.key === 'Enter') search()"
+                >
+                <button class="search-btn" id="searchBtn" onclick="search()">
+                    🔍 查询
+                </button>
+            </div>
+        </div>
+
+        <div class="toolbar">
+            <div class="result-info" id="resultInfo"></div>
+            <button class="export-btn" id="exportBtn" onclick="exportToExcel()" disabled>
+                📥 导出Excel
+            </button>
+        </div>
+
+        <div class="table-container">
+            <div id="tableContent">
+                <div class="empty-state">
+                    <div class="empty-icon">📊</div>
+                    <p>请输入关键词开始查询</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 全局变量存储查询结果
+        let currentData = [];
+
+        // 查询函数
+        async function search() {
+            const query = document.getElementById('searchInput').value.trim();
+            
+            if (!query) {
+                alert('请输入查询条件');
+                return;
+            }
+
+            const searchBtn = document.getElementById('searchBtn');
+            const tableContent = document.getElementById('tableContent');
+            const exportBtn = document.getElementById('exportBtn');
+            const resultInfo = document.getElementById('resultInfo');
+
+            // 显示加载状态
+            searchBtn.disabled = true;
+            searchBtn.textContent = '查询中...';
+            tableContent.innerHTML = `
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p>正在查询数据库，请稍候...</p>
+                </div>
+            `;
+            exportBtn.disabled = true;
+            resultInfo.textContent = '';
+
+            try {
+                // 调用 Dify API
+                const difyApiUrl = 'http://it-agent.fineres.com/v1/workflows/run';
+                const difyApiKey = 'app-0ZYZo9TXGCBDQhJFOOUejNPI';
+
+                const response = await fetch(difyApiUrl, {
+                    method: 'POST',
+                    mode: 'cors', // 明确指定CORS模式
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${difyApiKey}`
+                    },
+                    body: JSON.stringify({
+                        inputs: {
+                            query: query
+                        },
+                        response_mode: "blocking",
+                        user: "S.will"
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('API 调用失败');
+                }
+
+                const result = await response.json();
+                
+                // 调试：输出原始返回数据
+                console.log('Dify原始返回数据:', result);
+                
+                // 解析 Dify 返回的数据
+                let responseData;
+                try {
+                    if (result.data && result.data.outputs && result.data.outputs.sql_text) {
+                        // 从 sql_text 字段中提取 JSON 数据
+                        const sqlTextStr = result.data.outputs.sql_text;
+                        console.log('sql_text 原始内容:', sqlTextStr);
+                        
+                        // 如果 sql_text 是字符串，解析它
+                        if (typeof sqlTextStr === 'string') {
+                            const parsedSqlText = JSON.parse(sqlTextStr);
+                            if (parsedSqlText.success && parsedSqlText.data) {
+                                responseData = parsedSqlText.data;
+                            } else {
+                                throw new Error('sql_text 中没有找到 data 字段');
+                            }
+                        } else if (sqlTextStr.success && sqlTextStr.data) {
+                            // 如果 sql_text 已经是对象
+                            responseData = sqlTextStr.data;
+                        } else {
+                            throw new Error('sql_text 格式不正确');
+                        }
+                    } else {
+                        throw new Error('返回数据中未找到 data.outputs.sql_text 字段');
+                    }
+                } catch (parseError) {
+                    console.error('数据解析错误:', parseError);
+                    throw new Error('数据解析失败: ' + parseError.message);
+                }
+
+                if (responseData && Array.isArray(responseData) && responseData.length > 0) {
+                    currentData = responseData;
+                    renderTable(currentData);
+                    resultInfo.textContent = `查询成功，共找到 ${currentData.length} 条记录`;
+                    exportBtn.disabled = false;
+                } else {
+                    throw new Error('未找到相关数据');
+                }
+
+            } catch (error) {
+                console.error('查询错误:', error);
+                
+                // 详细的错误信息
+                let errorMsg = error.message;
+                if (error.name === 'TypeError' && errorMsg === 'Failed to fetch') {
+                    errorMsg = '跨域请求失败。可能的解决方案：<br>1. 确保Dify服务器已配置CORS允许跨域访问<br>2. 使用HTTPS协议（如果Dify服务器支持）<br>3. 通过代理服务器转发请求<br>4. 将HTML文件部署到与Dify相同域名的服务器上';
+                }
+                
+                tableContent.innerHTML = `
+                    <div class="error-message">
+                        <strong>查询失败：</strong>${errorMsg}
+                        <br><small>错误详情：${error.name}</small>
+                    </div>
+                `;
+                resultInfo.textContent = '';
+            } finally {
+                searchBtn.disabled = false;
+                searchBtn.textContent = '🔍 查询';
+            }
+        }
+
+        // 渲染表格
+        function renderTable(data) {
+            const tableContent = document.getElementById('tableContent');
+            
+            let html = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>标题</th>
+                            <th>描述</th>
+                            <th>标签层级一</th>
+                            <th>标签层级二</th>
+                            <th>标签层级三</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            data.forEach((item, index) => {
+                html += `
+                    <tr>
+                        <td><strong>${escapeHtml(item.标题 || '-')}</strong></td>
+                        <td>${escapeHtml(item.描述 || '-')}</td>
+                        <td><span class="tag tag-level-1">${escapeHtml(item.标签层级一 || '-')}</span></td>
+                        <td><span class="tag tag-level-2">${escapeHtml(item.标签层级二 || '-')}</span></td>
+                        <td><span class="tag tag-level-3">${escapeHtml(item.标签层级三 || '-')}</span></td>
+                    </tr>
+                `;
+            });
+
+            html += '</tbody></table>';
+            tableContent.innerHTML = html;
+        }
+
+        // HTML 转义
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // 导出 Excel
+        function exportToExcel() {
+            if (currentData.length === 0) {
+                alert('没有数据可导出');
+                return;
+            }
+
+            // 构建 CSV 内容
+            const headers = ['标题', '描述', '标签层级一', '标签层级二', '标签层级三'];
+            let csvContent = '\uFEFF'; // 添加 BOM 头，解决中文乱码问题
+            csvContent += headers.join(',') + '\n';
+
+            currentData.forEach(item => {
+                const row = [
+                    item.标题 || '',
+                    item.描述 || '',
+                    item.标签层级一 || '',
+                    item.标签层级二 || '',
+                    item.标签层级三 || ''
+                ].map(field => {
+                    // 处理包含逗号、换行符的字段
+                    const fieldValue = String(field || '');
+                    if (fieldValue.includes(',') || fieldValue.includes('\n') || fieldValue.includes('"')) {
+                        return `"${fieldValue.replace(/"/g, '""')}"`;
+                    }
+                    return fieldValue;
+                });
+                csvContent += row.join(',') + '\n';
+            });
+
+            // 创建下载链接
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', `产品需求_${new Date().toISOString().slice(0, 10)}.csv`);
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // 测试数据函数（用于演示）
+        function testSearch() {
+            const testData = {
+                "success": true,
+                "data": [
+                    {
+                        "标签层级三": "新增数据默认值",
+                        "标签层级二": "选择数据",
+                        "标题": "36577-关联数据可以快速添加数据",
+                        "描述": "",
+                        "标签层级一": "1.1表单字段"
+                    },
+                    {
+                        "标签层级三": "支持跨应用",
+                        "标签层级二": "关联数据",
+                        "标题": "0447790-期望关联数据字段可以跨应用关联主表",
+                        "描述": "",
+                        "标签层级一": "1.1表单字段"
+                    },
+                    {
+                        "标签层级三": "支持跨应用",
+                        "标签层级二": "关联数据",
+                        "标题": "55429-关联数据支持跨应用表单",
+                        "描述": "",
+                        "标签层级一": "1.1表单字段"
+                    },
+                    {
+                        "标签层级三": "支持跨应用",
+                        "标签层级二": "关联数据",
+                        "标题": "55007-关联数据支持选择跨应用表单",
+                        "描述": "",
+                        "标签层级一": "1.1表单字段"
+                    },
+                    {
+                        "标签层级三": "支持跨应用",
+                        "标签层级二": "关联数据",
+                        "标题": "0454222-关联数据跨应用",
+                        "描述": "",
+                        "标签层级一": "1.1表单字段"
+                    }
+                ]
+            };
+
+            currentData = testData.data;
+            renderTable(currentData);
+            document.getElementById('resultInfo').textContent = `测试数据，共 ${currentData.length} 条记录`;
+            document.getElementById('exportBtn').disabled = false;
+        }
+    </script>
+</body>
+</html>

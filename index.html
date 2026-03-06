@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hello</title>
+    <style>
+        /* 极简重置，确保页面占满视口且无多余边距 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+        }
+
+        /* 核心问候元素 */
+        .greeting {
+            font-size: clamp(3rem, 15vw, 10rem);  /* 响应式字体，最小3rem，最大10rem */
+            font-weight: 500;
+            color: #1a1a1a;
+            letter-spacing: 0.02em;
+            text-rendering: optimizeLegibility;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            /* 添加一点优雅的动画，柔和出现 */
+            animation: fadeIn 1.2s ease-out;
+        }
+
+        /* 简单的淡入效果 */
+        @keyframes fadeIn {
+            0% { opacity: 0; transform: scale(0.98); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        /* 可选的微小视觉趣味 —— 一条优雅的分隔线，但完全不影响“hello”的纯粹性 */
+        .greeting::after {
+            content: "";
+            display: block;
+            width: 2.5rem;
+            height: 3px;
+            background: #d0d0d0;
+            margin: 0.8rem auto 0;
+            border-radius: 2px;
+        }
+
+        /* 如果你想要完全没有装饰，可以注释掉上面的 .greeting::after 块 */
+        /* 为了保留原始简洁感，我保留它，但你可以随时删除 */
+    </style>
+</head>
+<body>
+<!-- 唯一的问候内容，语义化使用h1，但样式保持干净 -->
+<h1 class="greeting">Hello!</h1>
+
+<!-- 没有多余的元素，只有纯粹的 hello -->
+</body>
+</html>
